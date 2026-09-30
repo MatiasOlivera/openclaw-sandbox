@@ -20,7 +20,9 @@ sbx env rm --force              # = openclaw sandbox recreate --all
   outside it and is auto-bound RO. No `additionalWorkspaces`, no clone.
 - **Rest:** `sandboxOptions` pins cpus/memory/display/skills/pullPolicy;
   `gpu: false` (host has no passthrough — flip to `true` where nvidia
-  runtime exists); `ports` publishes CDP 9222 (loopback; Chromium ships
+  runtime exists); `ports` publishes CDP 9222 and pins gateway 18789:18789
+  (loopback; pinned so the Control UI origin is stable — ephemeral mapping
+  breaks `gateway.controlUi.allowedOrigins` matching; Chromium ships
   via playwright-kit, CDP serves on demand); `lifecycle.postCreate` = OpenClaw
   `setupCommand` (Ollama wiring, idempotent); MCP/secrets attach per-run via
   `--static-mcp` / `secrets:` + `bindings:` when needed.

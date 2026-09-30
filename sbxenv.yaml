@@ -34,6 +34,10 @@ ports:
   # Chromium CDP parity with OpenClaw sandboxed browser (loopback only).
   - sandbox: 9222
     host: 9222
+  # Pin the gateway port so the Control UI origin is stable across recreates
+  # (ephemeral mapping breaks gateway.controlUi.allowedOrigins matching).
+  - sandbox: 18789
+    host: 18789
 
 lifecycle:
   postCreate:
