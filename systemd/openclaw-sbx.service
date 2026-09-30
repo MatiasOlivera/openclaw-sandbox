@@ -1,0 +1,20 @@
+[Unit]
+Description=OpenClaw sandbox gateway (sbx autostart)
+Documentation=https://docs.openclaw.ai/
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/Documents/Projects/openclaw-sandbox
+# Idempotent: ensures sandboxd is up; sbx exec below auto-starts a
+# stopped sandbox (no agent re-attach on gateway restarts).
+ExecStartPre=/usr/bin/sbx daemon start
+# sbx exec auto-starts a stopped sandbox; gateway runs foreground so
+# systemd can supervise it. Port/token come from sandbox config (18789).
+ExecStart=/usr/bin/sbx exec openclaw-sbx -- openclaw gateway run
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
