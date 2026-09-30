@@ -1,0 +1,51 @@
+schemaVersion: "1"
+name: openclaw-sbx
+agent: openclaw
+
+kits:
+  - docker.io/sbx/openclaw-kit:latest
+  - docker.io/sbx/playwright-kit:latest
+
+args:
+  model:
+    default: qwen3.5:9b
+    description: Ollama model id (without provider prefix)
+  provider:
+    default: ollama
+    description: OpenClaw models provider id
+  baseUrl:
+    default: http://host.docker.internal:11434
+    description: Native Ollama API URL (no /v1)
+
+workspace: /home/matias/Documents/sandbox-testing
+
+env:
+  NODE_ENV: development
+
+sandboxOptions:
+  cpus: 4
+  memory: 8g
+  gpu: false # host has no GPU passthrough; set true where nvidia runtime exists
+  display: true
+  skills: readonly
+  pullPolicy: always
+
+ports:
+  # Chromium CDP parity with OpenClaw sandboxed browser (loopback only).
+  - sandbox: 9222
+    host: 9222
+
+lifecycle:
+  postCreate:
+    - name: Allow sandbox egress to host Ollama
+      command: sbx policy ls "$SBX_SANDBOX_NAME" --wide | grep -q "localhost:11434" || sbx policy allow network --sandbox "$SBX_SANDBOX_NAME" "localhost:11434"
+    - name: Point provider at host (native API, no /v1)
+      command: sbx exec "$SBX_SANDBOX_NAME" -- openclaw config set models.providers.${{ env.args.provider }}.baseUrl ${{ env.args.baseUrl }}
+    - name: Local credential marker
+      command: sbx exec "$SBX_SANDBOX_NAME" -- openclaw config set models.providers.${{ env.args.provider }}.apiKey ollama-local
+    - name: Force native tool-calling API
+      command: sbx exec "$SBX_SANDBOX_NAME" -- openclaw config set models.providers.${{ env.args.provider }}.api ollama
+    - name: Save ollama-local credential
+      command: sbx exec "$SBX_SANDBOX_NAME" -- sh -c 'echo "ollama-local" | openclaw models auth paste-api-key --provider ${{ env.args.provider }} --profile-id ${{ env.args.provider }}:default'
+    - name: Default to local model
+      command: sbx exec "$SBX_SANDBOX_NAME" -- openclaw models set ${{ env.args.provider }}/${{ env.args.model }}
