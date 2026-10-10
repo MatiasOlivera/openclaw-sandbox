@@ -15,7 +15,7 @@ sbx env rm --force              # = openclaw sandbox recreate --all
   `Restart=on-failure` + `RestartSec=60` with `StartLimitBurst=3/5min`, so a
   persistent failure (notably logged-out `sbx login`) fails fast instead of
   hammering the Secret Service / keyring. Re-enable only after `sbx login`:
-  `systemctl --user enable --now openclaw-sbx`.
+  `systemctl --user reset-failed openclaw-sbx; systemctl --user enable --now openclaw-sbx`.
 - **Network egress (Open + audit):** global `**` allow (`sbx policy allow network '**'`);
   per-sandbox `localhost:11434` allow kept in `lifecycle.postCreate` as
   future-proofing. Narrow later with `sbx policy deny network --sandbox

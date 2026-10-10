@@ -40,12 +40,15 @@ after 3 attempts instead of looping forever.
 
 Rules: repo copy at `systemd/openclaw-sbx.service` is authoritative; after
 `sbx login`, reinstall with `cp systemd/openclaw-sbx.service
-~/.config/systemd/user/` + `systemctl --user daemon-reload` + `enable --now`.
+~/.config/systemd/user/` + `systemctl --user daemon-reload` +
+`reset-failed openclaw-sbx` (clears the tripped start limit) + `enable --now`.
 Host stays disabled until login is restored.
 
 ### Positive Consequences
 
 - Logged-out gateway fails 3× max per 5 min, then stays dead; keyring gets no storm.
+  (Burst limit bounds rapid failures — ours fail in ~6s; a hypothetical
+  slow failure mode slower than the window would retry at backoff rate.)
 - Genuine gateway crashes still restart (60s backoff, visible in unit logs).
 - Re-enable path is one documented command after `sbx login`.
 
