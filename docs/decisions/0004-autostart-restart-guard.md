@@ -1,7 +1,7 @@
 # Bound the gateway autostart restart policy so logged-out state cannot storm the keyring
 
-- Status: proposed
-- Deciders: <user>
+- Status: accepted
+- Deciders: Matias Olivera
 - Date: 2026-10-10
 
 ## Context and Problem Statement
